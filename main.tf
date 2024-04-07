@@ -29,6 +29,7 @@ module "vpc" {
 
 resource "aws_security_group" "infra_sg" {
   name   = "infrastructure_sg"
+ # vpc_id = module.vpc.vpc_id
   ingress {
     from_port   = 80
     to_port     = 80
@@ -75,6 +76,7 @@ resource "aws_db_instance" "infrastructure" {
   db_subnet_group_name   = aws_db_subnet_group.infrastructure.name
   vpc_security_group_ids = [aws_security_group.infra_sg.id]
   parameter_group_name   = aws_db_parameter_group.infrastructure.name
+  skip_final_snapshot    = true
   port                   = 3306
 }
 
