@@ -2,10 +2,16 @@
 # SPDX-License-Identifier: MPL-2.0
 
 output "instance1_ip" {
-  value = aws_instance1.instance1_name.ip
+  value = aws_instance.instance1_name.public_ip
+}
+output "instance1_dns" {
+  value = aws_instance.instance1_name.public_ip
 }
 output "instance2_ip" {
-  value = aws_instance2.instance2_name.ip
+  value = aws_instance.instance2_name.public_dns
+}
+output "instance2_dns" {
+  value = aws_instance.instance2_name.public_dns
 }
 
 output "aws_db_instance" {

@@ -27,9 +27,8 @@ module "vpc" {
 
 
 
-resource "aws_security_group" "rds" {
-  name   = "infrastructure_rds"
-  vpc_id = module.vpc.vpc_id
+resource "aws_security_group" "infra_sg" {
+  name   = "infrastructure_sg"
   ingress {
     from_port   = 80
     to_port     = 80
@@ -49,15 +48,7 @@ resource "aws_security_group" "rds" {
   }
 }
 
-resource "aws_db_parameter_group" "infrastructure" {
-  name   = "infrastructure"
-  family = "mysql"
 
-  parameter {
-    name  = "log_connections"
-    value = "1"
-  }
-}
 
 resource "aws_db_subnet_group" "infrastructure" {
   name       = "infrastructure"
@@ -68,32 +59,40 @@ resource "aws_db_subnet_group" "infrastructure" {
   }
 }
 
+resource "aws_db_parameter_group" "infrastructure" {
+  name   = "infrastructure"
+  family = "mysql5.7"
+}
+
 resource "aws_db_instance" "infrastructure" {
+  allocated_storage      = 10
   identifier             = "infrastructure"
   instance_class         = "db.t3.micro"
   engine                 = "mysql"
+  engine_version         = "5.7"
   username               = "infra"
   password               = var.db_password
   db_subnet_group_name   = aws_db_subnet_group.infrastructure.name
-  vpc_security_group_ids = [aws_security_group.rds.id]
-  parameter_group_name   = aws_db_parameter_group.education.name
-  publicly_accessible    = true
-  skip_final_snapshot    = true
+  vpc_security_group_ids = [aws_security_group.infra_sg.id]
+  parameter_group_name   = aws_db_parameter_group.infrastructure.name
+  port                   = 3306
 }
 
-resource "aws_instance1" "instance1_name" {
+resource "aws_instance" "instance1_name" {
   ami           = "ami-a0cfeed8"
   instance_type = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.web-sg.id]
+  vpc_security_group_ids = [aws_security_group.infra_sg.id]
+  subnet_id = module.vpc.public_subnets[0]
   tags = {
     Name = random_pet.name.id
   }
 }
 
-resource "aws_instance2" "instance2_name" {
+resource "aws_instance" "instance2_name" {
   ami           = "ami-a0cfeed8"
   instance_type = "t2.micro"
-  vpc_security_group_ids = [aws_security_group.web-sg.id]
+  vpc_security_group_ids = [aws_security_group.infra_sg.id]
+  subnet_id = module.vpc.public_subnets[1]
   tags = {
     Name = random_pet.name.id
   }
